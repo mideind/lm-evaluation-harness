@@ -1,0 +1,29 @@
+task: icelandic_belebele
+dataset_path: facebook/belebele 
+fewshot_split: isl_Latn
+test_split: isl_Latn
+fewshot_config:
+  sampler: first_n
+output_type: generate_until
+should_decontaminate: true
+doc_to_decontamination_query: "{{question}}"
+doc_to_text: "Hér er texti sem þú skalt lesa vel og vandlega: {{flores_passage}}\nSpurning: {{question.strip()}}\nA: {{mc_answer1}}\nB: {{mc_answer2}}\nC: {{mc_answer3}}\nD: {{mc_answer4}}\nHvaða svar er réttast? Svaraðu með einum af stöfunum 'A', 'B', 'C' eða 'D' hér að neðan. Ekki skrifa neitt annað. Svar:\n"
+doc_to_target: !function utils.doc_to_target
+metric_list:
+  - metric: exact_match
+    aggregation: mean
+    higher_is_better: true
+generation_kwargs:
+  until:
+    - "\n\n"
+    - "Hér er texti"
+  do_sample: false
+repeats: 1
+filter_list:
+  - name: "get-answer"
+    filter:
+      - function: "regex"
+        regex_pattern: "([A-D])"
+      - function: "take_first"
+metadata:
+  version: 0.0
