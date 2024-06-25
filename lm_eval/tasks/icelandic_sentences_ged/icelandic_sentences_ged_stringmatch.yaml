@@ -1,0 +1,29 @@
+task: icelandic_sentences_ged_stringmatch
+dataset_path: mideind/icelandic-sentences-gec
+dataset_name: default
+output_type: generate_until
+test_split: train
+description: "Þú ert sérfræðingur í íslensku. Þú færð málsgrein á íslensku sem annaðhvort inniheldur villu(r) eða ekki. Ef málsgreinin inniheldur málfræðivillu, stafsetningarvillu eða aðra málfarsvillu sem ætti að leiðrétta, skrifaðu '0'. Ef málsgreinin er rétt og villulaus skaltu skrifa '1'. Þú verður að gefa svar og '0' og '1' eru einu valkostirnir.\n"
+doc_to_text: "Málsgrein: {{sentence}}\nSvar: "
+doc_to_target: !function utils.doc_to_target
+metric_list:
+  - metric: exact_match
+    aggregation: mean
+    higher_is_better: true
+generation_kwargs:
+  until:
+    - "\n\n"
+    - "Hér á eftir"
+  do_sample: false
+  temperature: 0.0
+repeats: 1
+filter_list:
+  - name: "get-answer"
+    filter:
+      - function: "first_number"
+        fallback_choices:
+          - "0"
+          - "1"
+      - function: "take_first"
+metadata:
+  version: 1.0
