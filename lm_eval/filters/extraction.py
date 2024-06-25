@@ -185,3 +185,49 @@ class MultiChoiceRegexFilter(RegexFilter):
             filtered_resps.append(filtered)
 
         return filtered_resps
+
+@register_filter("json")
+class JSONFilter(Filter):
+
+    def apply(self, resps, docs):
+
+        def filter_set(inst):
+            filtered = []
+            for resp in inst:
+                # Get substring between first and last curly braces
+                match = resp[resp.find("{") : resp.rfind("}") + 1]
+                filtered.append(match)
+            return filtered
+
+        filtered_resps = list(map(lambda x: filter_set(x), resps))
+
+        return filtered_resps
+
+
+@register_filter("first_number")
+class FirstNumberFilter(Filter):
+    def __init__(self, fallback_choices = None) -> None:
+        """
+        pass a string `regex` to run `re.compile(r"regex")` on.
+        `fallback` defines the output returned if no matches for the regex are located.
+        """
+        self.regex = re.compile(r"(\d+)")
+        self.fallback_choices = fallback_choices
+
+    def apply(self, resps, docs):
+
+        def filter_set(inst):
+            filtered = []
+            for resp in inst:
+                match = self.regex.search(resp)
+                if match:
+                    match = match.group(1).strip()
+                else:
+                    # If we don't find a match, choose a random fallback
+                    match = random.choice(self.fallback_choices)
+                filtered.append(match)
+            return filtered
+
+        filtered_resps = list(map(lambda x: filter_set(x), resps))
+
+        return filtered_resps
