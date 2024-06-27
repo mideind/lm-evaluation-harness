@@ -1,1 +1,1 @@
--e .
+-e .[anthropic,hf_transfer,openai,sentencepiece]
