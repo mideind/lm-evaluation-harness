@@ -1,0 +1,32 @@
+task: icelandic_winogrande_stringmatch
+dataset_path: mideind/icelandic-winogrande
+dataset_name: default
+output_type: generate_until
+test_split: train
+description: "Hér á eftir færðu nokkur dæmi, hvert með setningu sem inniheldur _ þar sem orð vantar og tvo valkosti til að fylla í eyðuna. Þú átt að velja þann valkost sem best passar inn í samhengi setningarinnar. Svaraðu með annað hvort '1' eða '2'. Ekki innihalda neitt annað í svarinu."
+doc_to_text: "Setning: {{sentence}}\nValkostur 1: {{option1}}\nValkostur 2: {{option2}}\nSvar:"
+doc_to_target: "{{answer}}" 
+metric_list:
+  - metric: exact_match
+    aggregation: mean
+    higher_is_better: true
+generation_kwargs:
+  until:
+    - "\n\n"
+    - "Hér á eftir"
+    - "Setning:"
+    - "You are an expert"
+  do_sample: false
+  temperature: 0.0
+num_fewshot: 3
+repeats: 1
+filter_list:
+  - name: "get-answer"
+    filter:
+      - function: "first_number"
+        fallback_choices:
+          - "1"
+          - "2"
+      - function: "take_first"
+metadata:
+  version: 1.0
