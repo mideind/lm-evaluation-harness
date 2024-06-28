@@ -1,0 +1,26 @@
+task: icelandic_arc_challenge
+dataset_path: mideind/icelandic-arc-challenge
+output_type: generate_until
+training_split: train
+validation_split: validation
+test_split: test
+doc_to_text: !function utils.doc_to_text 
+doc_to_target: "{{answerKey}}"
+should_decontaminate: true
+doc_to_decontamination_query: "{{question}}"
+metric_list:
+  - metric: exact_match
+    aggregation: mean
+    higher_is_better: true
+generation_kwargs:
+  until:
+    - "\n\n"
+    - "Spurning: "
+  do_sample: false
+repeats: 1
+filter_list:
+  - name: "get-answer"
+    filter:
+      - function: "regex"
+        regex_pattern: "([A-D])"
+      - function: "take_first"
