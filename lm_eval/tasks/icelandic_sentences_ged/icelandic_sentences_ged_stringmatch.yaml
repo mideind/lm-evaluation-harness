@@ -14,6 +14,7 @@ generation_kwargs:
   until:
     - "\n\n"
     - "Hér á eftir"
+  max_gen_toks: 32
   do_sample: false
   temperature: 0.0
 repeats: 1

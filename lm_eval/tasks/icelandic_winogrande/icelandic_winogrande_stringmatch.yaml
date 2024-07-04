@@ -16,6 +16,7 @@ generation_kwargs:
     - "Hér á eftir"
     - "Setning:"
     - "You are an expert"
+  max_gen_toks: 32
   do_sample: false
   temperature: 0.0
 num_fewshot: 3

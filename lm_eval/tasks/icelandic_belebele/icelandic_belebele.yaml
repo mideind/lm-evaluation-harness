@@ -17,6 +17,7 @@ generation_kwargs:
   until:
     - "\n\n"
     - "Hér er texti"
+  max_gen_toks: 32
   do_sample: false
 repeats: 1
 filter_list:
