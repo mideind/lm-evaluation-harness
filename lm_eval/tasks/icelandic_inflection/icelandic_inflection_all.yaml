@@ -1,6 +1,6 @@
 task: icelandic_inflection_all
-dataset_name: mideind/icelandic-inflection-all-flat
-dataset_path: json
+dataset_path: mideind/icelandic-inflection-all-flat
+dataset_name: default
 output_type: generate_until
 test_split: train
 process_docs: !function utils.process_docs
