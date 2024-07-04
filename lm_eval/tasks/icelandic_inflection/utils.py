@@ -1,4 +1,5 @@
 import json
+import datasets
 from typing import Any, List, Mapping, cast
 
 from lm_eval.api.filter import Filter
@@ -41,4 +42,23 @@ def json_metric(items):
         # Invalid JSON is always wrong
         return 0
     return int(json_match(sampled_json, correct_json))
+
+
+def process_docs(dataset: datasets.Dataset):
+    case_mapping = {
+        "nf": "nefnifalli",
+        "þf": "þolfalli",
+        "þgf": "þágufalli",
+        "ef": "eignarfalli",
+    }
+    plurality_mapping = {
+        "et": "eintölu",
+        "ft": "fleirtölu",
+    }
+    def _helper(doc):
+        doc["case"] = case_mapping[doc["case"]]
+        doc["plurality"] = plurality_mapping[doc["plurality"]]
+        return doc
+
+    return dataset.map(_helper)
 

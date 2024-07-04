@@ -1,0 +1,31 @@
+task: icelandic_inflection_all
+dataset_name: mideind/icelandic-inflection-all-flat
+dataset_path: json
+output_type: generate_until
+test_split: train
+process_docs: !function utils.process_docs
+description: "Þú ert sérfræðingur í íslenskri málfræði."
+doc_to_text: ' Hver er beygingarmynd nafnliðarins "{{noun_phrase}}" í {{case}} {{plurality}} án greinis? Svaraðu einungis með beygingarmyndinni og ekki innihalda neitt annað í svarinu.\nSvar:'
+doc_to_target: "{{inflection}}" 
+num_fewshot: 1
+target_delimiter: " "
+metric_list:
+  - metric: exact_match
+    aggregation: mean
+    higher_is_better: true
+generation_kwargs:
+  until:
+    - "Þú ert sérfræðingur"
+    - "Hver er beygingarmynd"
+    - "\n\n"
+  max_gen_toks: 50
+  do_sample: false
+  temperature: 0.0
+repeats: 1
+metadata:
+    version: 1.0
+filter_list:
+  - name: "get-answer"
+    filter:
+      - function: "remove_whitespace"
+      - function: "take_first"
