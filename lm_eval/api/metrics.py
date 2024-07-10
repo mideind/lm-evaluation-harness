@@ -127,6 +127,29 @@ def brier_score(items):  # This is a passthrough function
 
 
 @register_metric(
+    metric="lm_judge_score",
+    higher_is_better=True,
+    aggregation="mean",
+)
+def lm_judge_score_fn(items):
+    _, label = items
+    label_to_score = {
+        "poor": 0,
+        "fair": 1,
+        "excellent": 2,
+    }
+    if label not in label_to_score:
+        eval_logger.warning(
+            "Invalid label found in lm_judge_score. Expected one of 'poor', 'fair', 'excellent'. Replacing with 'poor'."
+        )
+        label = "poor"
+
+    score = label_to_score[label]
+    best_possible_score = 2
+    return score / best_possible_score
+
+
+@register_metric(
     metric="brier_score",
     higher_is_better=False,
     output_type=["multiple_choice"],

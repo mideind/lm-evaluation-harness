@@ -1,0 +1,37 @@
+task: icelandic_wiki_qa
+dataset_path: mideind/icelandic_wiki_qa
+dataset_name: default
+output_type: generate_until
+test_split: train
+description: "Hér á eftir færðu spurningu um íslenska þekkingu sem þú átt að svara. Svaraðu á íslensku og hafðu svarið nákvæmt, en þó stutt og hnitmiðað. Rétta svarið er yfirleitt aðeins fáein orð eða stutt setning."
+doc_to_text: " Spurning: {{query}}\nSvar: "
+doc_to_target: "{{answer}}" 
+num_fewshot: 0
+target_delimiter: " "
+metric_list:
+  - metric: lm_judge_score
+    aggregation: mean
+    higher_is_better: true
+generation_kwargs:
+  until:
+    - "Spurning"
+    - "\n\n"
+  max_gen_toks: 100
+  do_sample: false
+  temperature: 0.0
+repeats: 1
+metadata:
+    version: 1.0
+filter_list:
+  - name: "get-answer"
+    filter:
+      - function: "remove_whitespace"
+      - function: "lm_judge"
+        model: "openai-chat-completions"
+        model_args: "model=gpt-4o"
+        judge_prompt: "[Instruction]\nPlease act as an impartial judge and evaluate the quality of the response provided by an AI assistant to the user question displayed below. Your evaluation should consider correctness. You will be given the question which was asked, a correct reference answer, and the assistant's answer. Begin your evaluation by briefly comparing the assistant's answer with the correct answer. Identify any mistakes. Be as objective as possible. Additional information beyond the reference answer's content should not be considered. If the assistant's answer is not in Icelandic but the reference answer is, you should rate the answer poorly. After providing your short explanation, you must rate the assistant's answer using the following scale: [[poor]]: Incorrect, off-topic or in a different language; [[fair]]: Partially aligns with the reference answer with some inaccuracies or irrelevant information; [[excellent]]: Accurate and relevant, matching the reference answer in content and language.\nProvide your rating strictly in this format: \"Rating: [[category]]\", for example: \"Rating: [[fair]]\".\n\n[Question]\n{query}\n\n[Start of Correct Answer]\n{answer}\n[End of Correct Answer]\n\n[Start of Assistant's Answer]\n{response}\n[End of Assistant's Answer]"
+        # judge_prompt: "[Leiðbeiningar]\nHér á eftir skaltu vera óhlutdrægur dómari og meta gæði svars sem veitt er af gervigreindarþjarki (AI assistant) við spurningu notanda sem birtist hér að neðan. Matið ætti að taka tillit til hversu rétt svarið er. Þér verður gefin spurningin sem var lögð fram, rétt viðmiðunarsvar, og svar þjarksins. Byrjaðu matið á því að bera saman svar þjarksins stuttlega við rétta svarið. Greindu öll mistök. Vertu eins hlutlægur og mögulegt er. Ekki taka mið af viðbótarupplýsingum sem gætu komið fram í svari umfram það sem er í viðmiðunarsvari. Ef svar þjarksins er ekki á íslensku en viðmiðunarsvarið er á íslensku þá er svarið lélegt. Eftir að hafa veitt stutta útskýringu, skaltu gefa svari þjarksins stig eftir eftirfarandi kvarða: [[poor]]: Rangt, ótengt eða svar á öðru tungumáli; [[fair]]: Að hluta til í samræmi við viðmiðunarsvarið, en vantar mikilvægar upplýsingar eða inniheldur einhverjar staðreyndavillur eða óviðkomandi upplýsingar; [[excellent]]: Nákvæmt og rétt, passar við viðmiðunarsvarið varðandi innihald og tungumál.\nGefðu einkunn þína nákvæmlega á þessu formi: „Einkunn: [[flokkur]]“, til dæmis: „Einkunn: [[fair]]“.\n\n[Spurning]\n{query}\n\n[Upphaf rétts svars]\n{answer}\n[Endir rétts svars]\n\n[Upphaf svars þjarksins]\n{response}\n[Endir svars þjarksins]"
+      - function: "regex"
+        regex_pattern: "Rating: \\[\\[(\\w+)\\]\\]"
+        # regex_pattern: "Einkunn: \\[\\[(\\w+)\\]\\]"
+      - function: "take_first"
