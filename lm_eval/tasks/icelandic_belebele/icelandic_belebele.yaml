@@ -1,9 +1,7 @@
 task: icelandic_belebele
 dataset_path: facebook/belebele 
-fewshot_split: isl_Latn
-test_split: isl_Latn
-fewshot_config:
-  sampler: first_n
+dataset_name: isl_Latn
+test_split: test
 output_type: generate_until
 should_decontaminate: true
 doc_to_decontamination_query: "{{question}}"
