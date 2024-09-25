@@ -210,8 +210,8 @@ class OpenaiCompletionsLM(TemplateLM):
                 client=self.client,
                 model=self.model,
                 prompt=inps,
-                max_tokens=0,
-                temperature=0.0,
+                max_completion_tokens=0,
+                temperature=0.0 if not self.model.startswith("o1") else 1,
                 logprobs=10,
                 seed=self.seed,
             )
@@ -266,20 +266,21 @@ class OpenaiCompletionsLM(TemplateLM):
                 inps.append(inp)
 
             until = request_args.get("until", ["<|endoftext|>"])
-            request_args["temperature"] = request_args.get("temperature", 0)
+            request_args["temperature"] = request_args.get("temperature", 0) if not self.model.startswith("o1") else 1
 
             response = oa_completion(
                 client=self.client,
                 model=self.model,
                 prompt=inps,
-                max_tokens=self.max_gen_toks,
-                stop=until,
+                max_completion_tokens=self.max_gen_toks,
                 seed=self.seed,
+                temperature=request_args.get("temperature", 0.0) if not self.model.startswith("o1") else 1,
                 **{
                     k: v
                     for k, v in request_args.items()
-                    if k not in {"do_sample", "max_gen_toks", "until"}
+                    if k not in {"do_sample", "max_gen_toks", "until", "temperature"}
                 },
+                **({stop: until} if not self.model.startswith("o1") else {}),
             )
             for resp, (context, args_) in zip(response.choices, chunk):
                 s = getattr(resp, "text")
@@ -435,8 +436,9 @@ class OpenaiChatCompletionsLM(LM):
                             raise ValueError(
                                 f"Expected repr(kwargs['until']) to be of type Union[str, list] but got {until}"
                             )
-                        kwargs["stop"] = until
-                    kwargs["max_tokens"] = kwargs.pop("max_gen_toks", self.max_gen_toks)
+                        if not self.model.startswith("o1"):
+                            kwargs["stop"] = until
+                    kwargs["max_completion_tokens"] = kwargs.pop("max_gen_toks", self.max_gen_toks)
                 else:
                     raise ValueError(
                         f"Expected repr(kwargs) to be of type repr(dict) but got {kwargs}"
@@ -447,7 +449,12 @@ class OpenaiChatCompletionsLM(LM):
                     chat=True,
                     messages=inps,
                     model=self.model,
-                    **kwargs,
+                    temperature=kwargs.get("temperature", 0.0) if not self.model.startswith("o1") else 1,
+                    **{
+                        k: v
+                        for k, v in kwargs.items()
+                        if k not in {"temperature"}
+                    },
                 )
 
                 for resp, (context, args_) in zip(response.choices, chunk):

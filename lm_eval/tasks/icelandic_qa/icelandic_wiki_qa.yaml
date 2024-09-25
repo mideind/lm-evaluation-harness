@@ -16,7 +16,7 @@ generation_kwargs:
   until:
     - "Spurning"
     - "\n\n"
-  max_gen_toks: 100
+  max_gen_toks: 1000
   do_sample: false
   temperature: 0.0
 repeats: 1
