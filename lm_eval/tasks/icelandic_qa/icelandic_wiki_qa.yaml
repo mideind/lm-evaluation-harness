@@ -15,7 +15,6 @@ metric_list:
 generation_kwargs:
   until:
     - "Spurning"
-    - "\n\n"
   max_gen_toks: 100
   do_sample: false
   temperature: 0.0
@@ -25,6 +24,8 @@ metadata:
 filter_list:
   - name: "get-answer"
     filter:
+      - function: "regex"
+        regex_pattern: "(?s)(?:.*?</think>)?(.*)"
       - function: "remove_whitespace"
       - function: "lm_judge"
         model: "openai-chat-completions"

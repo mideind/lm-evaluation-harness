@@ -17,7 +17,6 @@ generation_kwargs:
   until:
     - "Þú ert sérfræðingur"
     - "Hver er beygingarmynd"
-    - "\n\n"
   max_gen_toks: 50
   do_sample: false
   temperature: 0.0
@@ -27,5 +26,7 @@ metadata:
 filter_list:
   - name: "get-answer"
     filter:
+      - function: "regex"
+        regex_pattern: "(?s)(?:.*?</think>)?(.*)"
       - function: "remove_whitespace"
       - function: "take_first"

@@ -12,7 +12,6 @@ metric_list:
     higher_is_better: true
 generation_kwargs:
   until:
-    - "\n\n"
     - "Hér á eftir"
   max_gen_toks: 32
   do_sample: false
@@ -21,6 +20,8 @@ repeats: 1
 filter_list:
   - name: "get-answer"
     filter:
+      - function: "regex"
+        regex_pattern: "(?s)(?:.*?</think>)?(.*)"
       - function: "first_number"
         fallback_choices:
           - "0"
