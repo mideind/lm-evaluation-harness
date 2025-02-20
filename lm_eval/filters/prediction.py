@@ -1,6 +1,7 @@
 from lm_eval.api.filter import Filter
 from lm_eval.api.instance import Instance
 from lm_eval.api.registry import get_model, register_filter
+import os
 
 
 @register_filter("lm_judge")
@@ -11,6 +12,7 @@ class LMJudge(Filter):
         self.judge_prompt = judge_prompt
 
         assert model in ["openai-chat-completions"]
+        os.environ["OPENAI_API_KEY"] = os.environ["OPENAI_API_KEY_JUDGE"]
 
         self.lm = get_model(model).create_from_arg_string(
             model_args,
